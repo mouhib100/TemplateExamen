@@ -22,22 +22,26 @@ exports.addPlat = async (req, res) => {
 };
 
 exports.UpdateOnePlat = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    await PlatSchema.findByIdAndUpdate(id, {
-      $set: { ...req.body },
-    });
+    const id = req.params.id;
+    const { plat_name, price, nbre_ingredients, description, plat_image } =
+      req.body;
 
-    const updatedPlat = await PlatSchema.findById(id); //fetch the updated "plat" document
+    const updatedPlat = await Plat.findByIdAndUpdate(
+      id,
+      { plat_name, price, nbre_ingredients, description, plat_image },
+      { new: true }
+    );
 
     if (!updatedPlat) {
       return res.status(404).json({ error: "Plat not found" });
     }
 
-    return res.status(200).send({ msg: "plat updated sucessfully" });
+    return res
+      .status(200)
+      .json({ message: "Plat updated successfully", plat: updatedPlat });
   } catch (error) {
-    res.status(500).json({ error: "Failed to update plat" });
+    return res.status(500).json({ error: error.message });
   }
 };
 
