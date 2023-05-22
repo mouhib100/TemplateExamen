@@ -40,10 +40,23 @@ app.use(function (err, req, res, next) {
 
 const server = http.createServer(app);
 const io = require("socket.io")(server);
-io.on("connection", (client) => {
-  console.log("socket is connected!");
-  client.on("greeting", (user) => {
-    client.emit("greeting", `hello ${user}`); // when this part emits, the socket.on on the client side will be triggered
+
+var name;
+
+io.on("connection", (socket) => {
+  console.log("new user connected");
+
+  socket.on("joining msg", (username) => {
+    name = username;
+    io.emit("chat message", `---${name} joined the chat---`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+    io.emit("chat message", `---${name} left the chat---`);
+  });
+  socket.on("chat message", (msg) => {
+    socket.broadcast.emit("chat message", msg); //sending message to all except the sender
   });
 });
 server.listen(5000, () => {
